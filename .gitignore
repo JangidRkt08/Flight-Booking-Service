@@ -1,0 +1,19 @@
+# Node.js dependencies
+node_modules/
+
+# Environment variables
+.env
+src/config/config.json
+# Logs
+logs/
+*.log
+combined.log
+
+# Build outputs
+dist/
+build/
+
+# Temporary files
+*.tmp
+*.swp
+
