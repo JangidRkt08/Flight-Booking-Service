@@ -1,11 +1,17 @@
 const {StatusCodes} = require('http-status-codes')
 
-const {Boooking} = require('../models')
+const {Booking} = require('../models')
 const Crudrepository = require('./crud-repository')
 
 class BookingRepository extends Crudrepository{
     constructor(){
-        super(Boooking)
+        super(Booking)
+    }
+
+    // we donnot use crud method for creating final booking because we are going to pass transaction object
+    async createBooking(data,transaction){
+        const response = await Booking.create(data,{transaction:transaction})
+        return response
     }
 }
 

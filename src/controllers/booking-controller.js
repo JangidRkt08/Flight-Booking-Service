@@ -9,7 +9,7 @@ async function createBooking(req, res) {
     const response = await bookingService.createBooking(
         {
             flightId: req.body.flightId,
-            userID: req.body.userId,
+            userId: req.body.userId,
             noOfSeats: req.body.noOfSeats
         }
     );

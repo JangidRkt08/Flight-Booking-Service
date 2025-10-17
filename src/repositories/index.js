@@ -1,5 +1,5 @@
-const bookingRepository = require("./booking-repository");
+const BookingRepository = require("./booking-repository");
 
 module.exports = {
-    bookingRepository
+    BookingRepository
 }
