@@ -6,6 +6,14 @@ const db = require("../models");
 const serverConfig = require("../config/server-config");
 const AppError = require("../utils/errors/app-error");
 const bookingRepository = new BookingRepository();
+const {Enums} = require('../utils/common')
+const {
+  PENDING,
+  BOOKED,
+  CANCELLED,
+  INITIATED
+
+} = Enums.BOOKING_STATUS
 
 async function createBooking(data) {
   // Unmanaged Transaction
@@ -53,14 +61,42 @@ async function createBooking(data) {
   }
 }
 
+async function makePayment(data){
+  const transaction = await db.sequelize.transaction();
+  try {
+    const bookingDetails = await bookingRepository.get(data.bookingId, transaction);
+    if(bookingDetails.totalCost != data.totalCost){
+      throw new AppError("The Amount of the Payment doesn't match",StatusCodes.BAD_REQUEST)
+    }
+    if(bookingDetails.userId != data.userId){
+      throw new AppError("The User Id doesn't match",StatusCodes.BAD_REQUEST)
+    }
+    // console.log(bookingDetails);
+    
+    // we assume that the payment is successful
+    const response = await bookingRepository.update(
+      data.bookingId,
+      {status: BOOKED},
+      transaction
+    )
+    await transaction.commit();
+    // return response
+    
+  } catch (error) {
+      await transaction.rollback();
+    throw error;
+  }
+}
+
 module.exports = {
   createBooking,
+  makePayment
 };
 
 
 // -----> Other Option To manage Transactions  <------
 
-// it will wait for transactrion to complete whether to rollback or commit
+// 1. it will wait for transactrion to complete whether to rollback or commit
 //   try {
 //     const result = await db.sequelize.transaction(async function bookingImpl(
 //       t
@@ -81,7 +117,7 @@ module.exports = {
 //     throw error;
 //   }
 
-//   this will not wait for transaction to complete start nd then commit only not rollback
+// 2.  this will not wait for transaction to complete start nd then commit only not rollback
 //   return new Promise((resolve, reject) => {
 //     const result = db.sequelize.transaction(async function bookingImpl(t) {
 //       const flight = await axios.get(
